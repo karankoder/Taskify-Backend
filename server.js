@@ -1,28 +1,8 @@
-import express from 'express';
-import mongoose from 'mongoose';
-import userRouter from './routes/user.js';
+import { app } from './app.js';
+import { connectDB } from './data/database.js';
 
-const app = express();
+connectDB();
 
-app.use(express.json());
-app.use('/users', userRouter);
-
-mongoose
-  .connect('mongodb://127.0.0.1:27017', {
-    dbName: 'Taskify',
-  })
-  .then(() => {
-    console.log('Database Connected');
-  })
-  .catch((err) => {
-    console.log('Database Connection failed');
-    console.log(err);
-  });
-
-app.get('/', (req, res) => {
-  res.send('Server is working');
-});
-
-app.listen(4000, () => {
+app.listen(process.env.port, () => {
   console.log('Server is running on port 4000');
 });
