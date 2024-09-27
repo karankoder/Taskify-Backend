@@ -9,7 +9,7 @@ export const saveCookie = (user, res, next, statusCode, message) => {
       .cookie('token', token, {
         httpOnly: true,
         maxAge: 20 * 60 * 1000,
-        sateSite: process.env.NODE_ENV === 'development' ? 'lax' : 'none',
+        sameSite: process.env.NODE_ENV === 'development' ? 'lax' : 'none',
         secure: process.env.NODE_ENV === 'development' ? false : true,
       })
       .json({
