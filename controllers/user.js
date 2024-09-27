@@ -25,7 +25,7 @@ export const createNewUser = async (req, res, next) => {
   }
 };
 
-export const userLogin = async (req, res) => {
+export const userLogin = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -53,7 +53,7 @@ export const userProfile = (req, res) => {
   });
 };
 
-export const logout = (req, res) => {
+export const logout = (req, res, next) => {
   try {
     res
       .status(200)
