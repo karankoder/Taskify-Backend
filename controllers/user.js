@@ -19,7 +19,7 @@ export const createNewUser = async (req, res, next) => {
 
     user = await User.create({ name, email, password: hashedpswd });
 
-    saveCookie(user, res, 201, 'User Created Successfully');
+    saveCookie(user, res, next, 201, 'User Created Successfully');
   } catch (error) {
     next(error);
   }
@@ -40,7 +40,7 @@ export const userLogin = async (req, res, next) => {
       return next(new ErrorHandler('Invalid Password!', 404));
     }
 
-    saveCookie(user, res, 200, `Welcome Back, ${user.name}`);
+    saveCookie(user, res, next, 200, `Welcome Back, ${user.name}`);
   } catch (error) {
     next(error);
   }
