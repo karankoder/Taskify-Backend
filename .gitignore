@@ -37,6 +37,7 @@ __pycache__/
 
 # Environment variables
 .env
+data/.env
 .env.local
 
 # Generated code or build artifacts

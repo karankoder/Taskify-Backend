@@ -1,8 +1,12 @@
 import mongoose from 'mongoose';
 
 export const connectDB = () => {
+  const mongo_uri =
+    process.env.NODE_ENV === 'development'
+      ? process.env.LOCAL_MONGO_URI
+      : process.env.MONGO_URI;
   mongoose
-    .connect(process.env.MONGO_URI, {
+    .connect(mongo_uri, {
       dbName: 'Taskify',
     })
     .then((c) => {
