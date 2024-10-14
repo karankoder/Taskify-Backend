@@ -1,10 +1,7 @@
 import { User } from '../models/user.js';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import { saveCookie } from '../utils/features.js';
 import ErrorHandler from '../middlewares/error.js';
-
-export const getAllUsers = async (req, res, next) => {};
 
 export const createNewUser = async (req, res, next) => {
   try {
@@ -23,6 +20,24 @@ export const createNewUser = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+export const createGoogleUser = async (
+  accessToken,
+  refreshToken,
+  profile,
+  cb
+) => {
+  let user = await User.findOne({ email: profile.emails[0].value });
+
+  if (!user) {
+    user = await User.create({
+      name: profile.displayName,
+      email: profile.emails[0].value,
+      password: null,
+    });
+  }
+  return cb(null, profile);
 };
 
 export const userLogin = async (req, res, next) => {
@@ -51,6 +66,24 @@ export const userProfile = (req, res) => {
     success: true,
     user: req.user,
   });
+};
+
+export const passwordSetter = async (req, res, next) => {
+  try {
+    const { password } = req.body;
+
+    const hashedpswd = await bcrypt.hash(password, 5);
+
+    req.user.password = hashedpswd;
+    await req.user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Password Set Successfully',
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const logout = (req, res, next) => {

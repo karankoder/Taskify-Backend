@@ -37,6 +37,7 @@ __pycache__/
 
 # Environment variables
 .env
+config.env
 data/.env
 .env.local
 
