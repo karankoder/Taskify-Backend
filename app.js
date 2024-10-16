@@ -7,7 +7,6 @@ import { errorMiddleware } from './middlewares/error.js';
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import cors from 'cors';
-import jwt from 'jsonwebtoken';
 import { createGoogleUser } from './controllers/user.js';
 import { saveGoogleCookie } from './utils/features.js';
 
@@ -28,12 +27,21 @@ app.use(
 );
 
 app.use(passport.initialize());
+export const backendUrl =
+  process.env.NODE_ENV === 'development'
+    ? process.env.LOCAL_BACKEND_URL
+    : process.env.BACKEND_URL;
+
+export const frontendUrl =
+  process.env.NODE_ENV === 'development'
+    ? process.env.LOCAL_FRONTEND_URL
+    : process.env.FRONTEND_URL;
 passport.use(
   new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: 'http://localhost:4000/Oauth2/google/callback',
+      callbackURL: `${backendUrl}/Oauth2/google/callback`,
       scope: ['profile', 'email'],
     },
     async function (accessToken, refreshToken, profile, cb) {
@@ -50,7 +58,7 @@ app.get(
 app.get(
   '/Oauth2/google/callback',
   passport.authenticate('google', {
-    failureRedirect: 'http://localhost:5173/',
+    failureRedirect: `${frontendUrl}/`,
     session: false,
   }),
   async (req, res, next) => {

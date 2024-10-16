@@ -50,6 +50,10 @@ export const userLogin = async (req, res, next) => {
       return next(new ErrorHandler('Invalid Email!', 404));
     }
 
+    if (!user.password) {
+      return next(new ErrorHandler('Please Set Your Password!', 404));
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return next(new ErrorHandler('Invalid Password!', 404));

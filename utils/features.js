@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { User } from '../models/user.js';
+import { frontendUrl } from '../app.js';
 
 export const saveCookie = (user, res, next, statusCode, message) => {
   try {
@@ -36,11 +37,11 @@ export const saveGoogleCookie = async (user, res, next, statusCode) => {
       secure: process.env.NODE_ENV === 'development' ? false : true,
     });
 
-    console.log(findUser.password);
     if (findUser.password === null) {
-      res.redirect('http://localhost:5173/set-password');
+      console.log(`${frontendUrl}/set-password`);
+      res.redirect(`${frontendUrl}/set-password`);
     } else {
-      res.redirect('http://localhost:5173/main');
+      res.redirect(`${frontendUrl}/main`);
     }
   } catch (error) {
     next(error);
