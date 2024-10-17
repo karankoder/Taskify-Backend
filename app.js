@@ -11,6 +11,15 @@ import { createGoogleUser } from './controllers/user.js';
 import { saveGoogleCookie } from './utils/features.js';
 
 export const app = express();
+export const backendUrl =
+  process.env.NODE_ENV === 'development'
+    ? process.env.LOCAL_BACKEND_URL
+    : process.env.BACKEND_URL;
+
+export const frontendUrl =
+  process.env.NODE_ENV === 'development'
+    ? process.env.LOCAL_FRONTEND_URL
+    : process.env.FRONTEND_URL;
 
 config({
   path: './data/config.env',
@@ -27,15 +36,6 @@ app.use(
 );
 
 app.use(passport.initialize());
-export const backendUrl =
-  process.env.NODE_ENV === 'development'
-    ? process.env.LOCAL_BACKEND_URL
-    : process.env.BACKEND_URL;
-
-export const frontendUrl =
-  process.env.NODE_ENV === 'development'
-    ? process.env.LOCAL_FRONTEND_URL
-    : process.env.FRONTEND_URL;
 passport.use(
   new GoogleStrategy(
     {

@@ -74,6 +74,9 @@ export const userProfile = (req, res) => {
 
 export const passwordSetter = async (req, res, next) => {
   try {
+    if (req.user.password) {
+      return next(new ErrorHandler('Password Already Set', 400));
+    }
     const { password } = req.body;
 
     const hashedpswd = await bcrypt.hash(password, 5);
