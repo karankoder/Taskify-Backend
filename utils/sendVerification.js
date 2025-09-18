@@ -1,29 +1,23 @@
-import nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 import { Verification } from '../models/verification.js';
 import crypto from 'crypto';
 import { frontendUrl } from '../app.js';
 
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
 export const sendVerification = async (to, name, password, res) => {
   try {
-    const transporter = nodemailer.createTransport({
-      host: 'smtp.sendgrid.net',
-      port: 587,
-      auth: {
-        user: 'apikey',
-        pass: process.env.SENDGRID_API_KEY,
-      },
-    });
-
-    const from = `"Taskify" <${process.env.SMTP_EMAIL_ID}>`;
+    const from = `Taskify <${process.env.SMTP_EMAIL_ID}>`;
     const token = crypto.randomBytes(32).toString('hex');
     const expiry_hours = 1;
+
     const verification_link = `${frontendUrl}/auth/verify-email?email=${encodeURIComponent(
       to
     )}&token=${token}`;
 
-    const mailOptions = {
-      from,
+    const msg = {
       to,
+      from,
       subject: 'Verify Your Email for Taskify',
       html: `
         <html lang="en">
@@ -79,11 +73,11 @@ export const sendVerification = async (to, name, password, res) => {
             </tr>
           </table>
         </body>
-        </html>`,
+        </html>
+      `,
     };
 
-    await transporter.sendMail(mailOptions);
-    // console.log('Email sent successfully to:', to);
+    await sgMail.send(msg);
 
     await Verification.findOneAndUpdate(
       { email: to },
@@ -102,7 +96,10 @@ export const sendVerification = async (to, name, password, res) => {
       message: 'Email sent for verification. Please check your inbox.',
     });
   } catch (error) {
-    console.error('Error in sendVerification function:', error);
+    console.error(
+      'Error in sendVerification function:',
+      error.response?.body || error
+    );
 
     if (!res.headersSent) {
       res.status(500).json({
