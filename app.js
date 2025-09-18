@@ -23,6 +23,7 @@ export const frontendUrl =
 
 app.use(express.json());
 app.use(cookieParser());
+console.log(process.env.FRONTEND_URL);
 app.use(
   cors({
     origin: [process.env.LOCAL_FRONTEND_URL, process.env.FRONTEND_URL],

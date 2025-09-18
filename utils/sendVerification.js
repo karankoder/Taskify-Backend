@@ -6,9 +6,6 @@ import { backendUrl, frontendUrl } from '../app.js';
 export const sendVerification = async (to, name, password, res) => {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
     auth: {
       user: process.env.SMTP_EMAIL_ID,
       pass: process.env.SMTP_APP_PASS,
@@ -89,7 +86,7 @@ export const sendVerification = async (to, name, password, res) => {
   transporter.sendMail(mailOptions, async (error, info) => {
     if (error) {
       console.error('Error sending email:', error);
-      throw new Error('Error sending email:', error);
+      throw error;
     }
     await Verification.findOneAndUpdate(
       { email: to },
