@@ -6,12 +6,11 @@ import { frontendUrl } from '../app.js';
 export const sendVerification = async (to, name, password, res) => {
   try {
     const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
+      host: 'smtp.sendgrid.net',
       port: 587,
-      secure: false,
       auth: {
-        user: process.env.SMTP_EMAIL_ID,
-        pass: process.env.SMTP_APP_PASS,
+        user: 'apikey',
+        pass: process.env.SENDGRID_API_KEY,
       },
     });
 
@@ -84,7 +83,7 @@ export const sendVerification = async (to, name, password, res) => {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully to:', to);
+    // console.log('Email sent successfully to:', to);
 
     await Verification.findOneAndUpdate(
       { email: to },
