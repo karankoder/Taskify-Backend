@@ -1,7 +1,7 @@
 import express from 'express';
+import './utils/config.js';
 import userRouter from './routes/user.js';
 import taskRouter from './routes/task.js';
-import { config } from 'dotenv';
 import cookieParser from 'cookie-parser';
 import { errorMiddleware } from './middlewares/error.js';
 import passport from 'passport';
@@ -20,10 +20,6 @@ export const frontendUrl =
   process.env.NODE_ENV === 'development'
     ? process.env.LOCAL_FRONTEND_URL
     : process.env.FRONTEND_URL;
-
-config({
-  path: './data/config.env',
-});
 
 app.use(express.json());
 app.use(cookieParser());

@@ -1,0 +1,110 @@
+import nodemailer from 'nodemailer';
+import { Verification } from '../models/verification.js';
+import crypto from 'crypto';
+import { backendUrl, frontendUrl } from '../app.js';
+
+export const sendVerification = async (to, name, password, res) => {
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.SMTP_EMAIL_ID,
+      pass: process.env.SMTP_APP_PASS,
+    },
+  });
+
+  const from = process.env.SMTP_EMAIL_ID;
+  const token = crypto.randomBytes(32).toString('hex');
+  const expiry_hours = 1;
+  const verification_link = `${frontendUrl}/auth/verify-email?email=${encodeURIComponent(
+    to
+  )}&token=${token}`;
+
+  const mailOptions = {
+    from,
+    to,
+    subject: 'Verify Your Email for Taskify',
+    html: `
+        <html lang="en">
+
+		<body style="margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f4f4;">
+    <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-collapse: collapse;">
+        <tr>
+            <td align="center" style="padding: 40px 0 30px 0; background-color: #2a6cdf; color: #ffffff;">
+                <h1 style="margin: 0; font-size: 32px; font-weight: bold;">Taskify</h1>
+                <p style="margin: 5px 0 0 0; font-size: 16px;">Your Personal Task Manager</p>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 40px 30px;">
+                <h2 style="font-size: 24px; margin: 0 0 20px 0; color: #333333;">Just one more step...</h2>
+                <p style="font-size: 16px; line-height: 1.5; margin: 0 0 25px 0; color: #555555;">
+                    Hi ${name},<br><br>
+                    Welcome to Taskify! To complete your registration and start organizing your tasks, please click the button below to verify your email address.
+                </p>
+                <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                        <td align="center">
+                            <table border="0" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td align="center" bgcolor="#2a6cdf" style="border-radius: 5px;">
+                                        <a href="${verification_link}" target="_blank" style="font-size: 18px; font-weight: bold; color: #ffffff; text-decoration: none; padding: 15px 35px; border-radius: 5px; display: inline-block;">Verify Email Address</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+                <p style="font-size: 16px; line-height: 1.5; margin: 25px 0; color: #555555;">
+                    This verification link will expire in ${expiry_hours} hours. If you're having trouble with the button, you can also copy and paste the following link into your browser:
+                </p>
+                <p style="font-size: 14px; line-height: 1.5; word-break: break-all; margin: 0 0 25px 0;">
+                    <a href="${verification_link}" target="_blank" style="color: #2a6cdf;">${verification_link}</a>
+                </p>
+                <p style="font-size: 16px; line-height: 1.5; margin: 0; color: #555555;">
+                    Thanks,<br>
+                    The Taskify Team
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 30px; background-color: #f4f4f4; text-align: center;">
+                <p style="margin: 0; font-size: 12px; color: #888888;">
+                    If you did not sign up for a Taskify account, you can safely ignore this email.
+                </p>
+                <p style="margin: 10px 0 0 0; font-size: 12px; color: #888888;">
+                    &copy; 2025 Taskify. All rights reserved.
+                </p>
+            </td>
+        </tr>
+    </table>
+</body>
+
+		</html>
+        `,
+  };
+
+  transporter.sendMail(mailOptions, async (error, info) => {
+    if (error) {
+      console.error('Error sending email:', error);
+      throw new Error('Error sending email:', error);
+    }
+    await Verification.findOneAndUpdate(
+      { email: to },
+      {
+        name,
+        email: to,
+        password,
+        expiry: new Date(Date.now() + 60 * 60 * 1000),
+        token,
+      },
+      { upsert: true }
+    );
+    res.status(200).json({
+      status: 'success',
+      message: 'Email sent for verification',
+    });
+  });
+};

@@ -2,6 +2,8 @@ import { User } from '../models/user.js';
 import bcrypt from 'bcrypt';
 import { saveCookie } from '../utils/features.js';
 import ErrorHandler from '../middlewares/error.js';
+import { sendVerification } from '../utils/sendVerification.js';
+import { Verification } from '../models/verification.js';
 
 export const createNewUser = async (req, res, next) => {
   try {
@@ -12,11 +14,7 @@ export const createNewUser = async (req, res, next) => {
       return next(new ErrorHandler('User Already Exist', 404));
     }
 
-    const hashedpswd = await bcrypt.hash(password, 5);
-
-    user = await User.create({ name, email, password: hashedpswd });
-
-    saveCookie(user, res, next, 201, 'User Created Successfully');
+    sendVerification(email, name, password, res);
   } catch (error) {
     next(error);
   }
@@ -60,6 +58,28 @@ export const userLogin = async (req, res, next) => {
     }
 
     saveCookie(user, res, next, 200, `Welcome Back, ${user.name}`);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyEmail = async (req, res, next) => {
+  try {
+    const { email, token } = req.params;
+    const verification = await Verification.findOne({ email });
+    if (!verification || verification.token != token)
+      return next(new ErrorHandler('Invalid or Expired Token', 400));
+
+    const hashedpswd = await bcrypt.hash(verification.password, 5);
+
+    const user = await User.create({
+      name: verification.name,
+      email: verification.email,
+      password: hashedpswd,
+    });
+
+    await Verification.deleteOne({ email });
+    saveCookie(user, res, next, 201, 'User Created Successfully');
   } catch (error) {
     next(error);
   }

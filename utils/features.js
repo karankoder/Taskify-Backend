@@ -38,7 +38,6 @@ export const saveGoogleCookie = async (user, res, next, statusCode) => {
     });
 
     if (findUser.password === null) {
-      console.log(`${frontendUrl}/setPassword`);
       res.redirect(`${frontendUrl}/setPassword`);
     } else {
       res.redirect(`${frontendUrl}/main`);

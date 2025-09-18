@@ -9,7 +9,6 @@ import { isAuthenticated } from '../middlewares/auth.js';
 import { cookieRefresher } from '../utils/features.js';
 
 const router = express.Router();
-
 router.post('/new', isAuthenticated, cookieRefresher, newTask);
 router.get('/all', isAuthenticated, getAllTask);
 router
