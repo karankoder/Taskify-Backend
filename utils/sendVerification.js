@@ -109,3 +109,5 @@ export const sendVerification = async (to, name, password, res) => {
     }
   }
 };
+
+// Commit
